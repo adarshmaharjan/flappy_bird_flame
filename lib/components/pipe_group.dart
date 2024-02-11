@@ -1,22 +1,34 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flappy_bird_flame/game/config.dart';
+import 'package:flappy_bird_flame/game/flappy_bird_game.dart';
 import 'package:flappy_bird_flame/game/pipe_position.dart';
+import 'package:flutter/foundation.dart';
 
 import 'pipe.dart';
 
-class PipeGroup extends PositionComponent {
+class PipeGroup extends PositionComponent with HasGameRef<FlappyBirdGame> {
   PipeGroup();
+
+  final _random = Random();
   @override
   Future<void> onLoad() async {
+    position.x = gameRef.size.x;
+    final heightMinusGround = gameRef.size.y - Config.groundHeight;
+    final spacing = 100 + _random.nextDouble() * (heightMinusGround / 4);
+    final centerY =
+        spacing + _random.nextDouble() * (heightMinusGround - spacing);
+
     addAll(
       [
         Pipe(
           pipePosition: PipePosition.top,
-          height: 100,
+          height: centerY - spacing / 2,
         ),
         Pipe(
           pipePosition: PipePosition.bottom,
-          height: 200,
+          height: heightMinusGround - (centerY + spacing / 2),
         )
       ],
     );
@@ -25,6 +37,11 @@ class PipeGroup extends PositionComponent {
   @override
   void update(double dt) {
     super.update(dt);
-    position.x -= Config.gameSpeed - dt;
+    position.x -= Config.gameSpeed * dt;
+
+    if (position.x < -10) {
+      removeFromParent();
+      debugPrint('removed');
+    }
   }
 }
