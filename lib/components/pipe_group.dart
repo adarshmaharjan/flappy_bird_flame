@@ -1,10 +1,11 @@
 import 'dart:math';
 
 import 'package:flame/components.dart';
+import 'package:flame_audio/flame_audio.dart';
+import 'package:flappy_bird_flame/game/assets.dart';
 import 'package:flappy_bird_flame/game/config.dart';
 import 'package:flappy_bird_flame/game/flappy_bird_game.dart';
 import 'package:flappy_bird_flame/game/pipe_position.dart';
-import 'package:flutter/foundation.dart';
 
 import 'pipe.dart';
 
@@ -34,6 +35,10 @@ class PipeGroup extends PositionComponent with HasGameRef<FlappyBirdGame> {
     );
   }
 
+  void updateScore() {
+    gameRef.bird.score += 1;
+  }
+
   @override
   void update(double dt) {
     super.update(dt);
@@ -41,7 +46,12 @@ class PipeGroup extends PositionComponent with HasGameRef<FlappyBirdGame> {
 
     if (position.x < -10) {
       removeFromParent();
-      debugPrint('removed');
+      updateScore();
+      FlameAudio.play(Assets.point);
+    }
+    if (gameRef.isHit) {
+      removeFromParent();
+      gameRef.isHit = false;
     }
   }
 }
